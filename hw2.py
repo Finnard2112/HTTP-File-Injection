@@ -56,6 +56,7 @@ def HTTP_callback(packet):
 # Queue callback
 def q_callback(packet):
     print("packet received")
+    packet.show()
     data = packet.get_payload()              
     pkt = IP(data)                         
     packet.accept()                          
@@ -64,7 +65,7 @@ def q_callback(packet):
 try:
 
     # Add NFQueue to forwarding rules
-    os.system('iptables -A FORWARD -p udp --dport 53 -j NFQUEUE --queue-num 1') 
+    os.system('iptables -A FORWARD -p tcp --dport 80 -j NFQUEUE --queue-num 1')
     print("\nAdded Forward rule")
 
     # Parse the server and target IP arguments
