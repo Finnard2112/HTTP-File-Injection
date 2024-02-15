@@ -99,11 +99,11 @@ try:
 except KeyboardInterrupt:
     os.system('iptables -F')                     # flush all iptables rule
     finished = True  # Signal the thread to stop
-    packet = Ether(src=target_MAC, dst=server_MAC) / ARP(op=2, pdst=args.server_ip, psrc=args.target_ip)
-    sendp(packet, iface=interface)
+    packet = ARP(op=2, pdst=args.server_ip, psrc=args.target_ip, hwsrc=target_MAC,hwdst=server_MAC)
+    send(packet, iface=interface, verbose=False)
     print(f"\nFixed server ARP table")
-    packet = Ether(src=server_MAC, dst=target_MAC) / ARP(op=2, pdst=args.target_ip, psrc=args.server_ip)
-    sendp(packet, iface=interface)
+    packet = ARP(op=2, pdst=args.target_ip, psrc=args.server_ip, hwsrc=server_MAC, hwdst=target_MAC)
+    send(packet, iface=interface, verbose=False)
     print(f"\nFixed Client ARP table")
 except Exception as e:
     print(e)
