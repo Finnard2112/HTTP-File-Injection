@@ -56,6 +56,25 @@ def HTTP_callback(packet):
 # Queue callback
 def q_callback(packet):
     print("packet received")
+
+    raw_pkt = packet.get_payload()
+    pkt = IP(raw_pkt)
+
+    if TCP in pkt:
+        tcp_pkt = pkt[TCP] 
+        print(f"TCP Packet: {tcp_pkt.sport} -> {tcp_pkt.dport}")
+        
+        if pkt.dport == 80 or pkt.sport == 80: 
+            print("HTTP data:", str(tcp_pkt.payload))
+
+    packet.accept()
+
+
+    data = packet.get_payload()                  # get payload of packet
+    pkt = IP(data)                         # parse it with scapy
+    if not pkt.haslayer(DNSQR):            # if this is not a DNS request
+        packet.accept()                          # tell the kernel to accept it
+        return
     packet.show()
     data = packet.get_payload()              
     pkt = IP(data)                         
