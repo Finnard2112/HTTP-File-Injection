@@ -67,19 +67,7 @@ def q_callback(packet):
         if pkt.dport == 80 or pkt.sport == 80: 
             print("HTTP data:", str(tcp_pkt.payload))
 
-    packet.accept()
-
-
-    data = packet.get_payload()                  # get payload of packet
-    pkt = IP(data)                         # parse it with scapy
-    if not pkt.haslayer(DNSQR):            # if this is not a DNS request
-        packet.accept()                          # tell the kernel to accept it
-        return
-    packet.show()
-    data = packet.get_payload()              
-    pkt = IP(data)                         
-    packet.accept()                          
-    return
+    packet.accept()                       
 
 try:
 
