@@ -64,9 +64,9 @@ def q_callback(packet):
         tcp_pkt = pkt[TCP] 
         print(f"TCP Packet: {tcp_pkt.sport} -> {tcp_pkt.dport}")
         
-        if pkt.dport == 80: 
-            print(packet[TCP].payload)
-            print(type(packet[TCP].payload))
+        if tcp_pkt.dport == 80: 
+            print(tcp_pkt.payload)
+            print(type(tcp_pkt.payload))
             # payload = str(packet[TCP].payload)
             # if payload.startswith("GET"):
             #     request_line = payload.split("\n")[0]
