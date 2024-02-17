@@ -63,13 +63,13 @@ def q_callback(packet):
     if TCP in pkt:  
         tcp_pkt = pkt[TCP] 
         print(f"TCP Packet: {tcp_pkt.sport} -> {tcp_pkt.dport}")
-        if tcp_pkt.dport == 80: 
-            http_pkt = tcp_pkt.payload
-            path = http_pkt.Path.decode()
+        if tcp_pkt.dport == 80 and HTTPRequest in tcp_pkt:
+            # The packet is an HTTP request, so we can directly access its fields
+            http_request = packet[HTTPRequest] 
+            path = http_request.Path.decode()
             if path[-4:] == ".exe" or path[-3:] == ".sh":
                 print(".exe received")
                 print(path)
-            print(http_pkt.Path.decode())
 
     packet.accept()                       
 
