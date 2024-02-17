@@ -64,8 +64,17 @@ def q_callback(packet):
         tcp_pkt = pkt[TCP] 
         print(f"TCP Packet: {tcp_pkt.sport} -> {tcp_pkt.dport}")
         
-        if pkt.dport == 80 or pkt.sport == 80: 
-            print("HTTP data:", str(tcp_pkt.payload))
+        if pkt.dport == 80: 
+            print(packet[TCP].payload)
+            print(type(packet[TCP].payload))
+            # payload = str(packet[TCP].payload)
+            # if payload.startswith("GET"):
+            #     request_line = payload.split("\n")[0]
+        
+            #     # The first line of the HTTP request contains the method, URL, and HTTP version, typically separated by spaces
+            #     method, url, http_version = request_line.split()
+                
+            #     print("URL Request String:", url)
 
     packet.accept()                       
 
