@@ -126,9 +126,9 @@ try:
     thread2.daemon = True
     thread2.start()
     print(f"\nSent ARPs")
-    thread3 = threading.Thread(target=sniff_sniff)
-    thread3.daemon = True
-    thread3.start()
+    # thread3 = threading.Thread(target=sniff_sniff)
+    # thread3.daemon = True
+    # thread3.start()
 
     nfqueue = NetfilterQueue()                       
     nfqueue.bind(1, q_callback)    
